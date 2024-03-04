@@ -2,10 +2,7 @@ package org.some.jackson.wrapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.StdDelegatingSerializer;
-import com.fasterxml.jackson.databind.util.StdConverter;
 import java.util.List;
-import java.util.Map;
 import lombok.SneakyThrows;
 import org.some.jackson.wrapper.NicePerson.NiceChild;
 import org.some.jackson.wrapper.Person.Child;
@@ -45,28 +42,14 @@ public class Main {
 
     SimpleModule nicePersonModule = new SimpleModule().addSerializer(new NicePersonSerializer());
     ObjectMapper personMapper = new ObjectMapper().registerModule(nicePersonModule);
-
     personStr = personMapper.writeValueAsString(person);
     System.out.println(personStr);
 
-    StdDelegatingSerializer nicknameSerializer = new StdDelegatingSerializer(new WrapperConverter<List<String>>());
-    StdDelegatingSerializer kidSerializer = new StdDelegatingSerializer(new WrapperConverter<List<NiceChild>>());
+    personMapper = new ObjectMapper()
+        .setAnnotationIntrospector(new WrapperIntrospector());
+    personStr = personMapper.writeValueAsString(person);
+    System.out.println(personStr);
 
-//    SimpleModule stdModule = new SimpleModule()
-//        .addSerializer(nicknameSerializer)
-//        .addSerializer(kidSerializer);
-
-//    ObjectMapper stdMapper = new ObjectMapper().registerModule(stdModule);
-//    personStr = stdMapper.writeValueAsString(person);
-//    System.out.println(personStr);
-  }
-
-  static class WrapperConverter<IN> extends StdConverter<IN, Map<String, IN>> {
-
-    @Override
-    public Map<String, IN> convert(IN value) {
-      return Map.of("Nickname", value);
-    }
   }
 
   @SneakyThrows
